@@ -17,4 +17,3 @@ Then set up the hooks with pre-commit install, when you perform your first commi
 pre-commit install
 ```
 check the if there any errors and rectify and re commit again.
-
