@@ -32,6 +32,7 @@ ALLOWED_HOSTS: List[Any] = []
 # Application definition
 
 INSTALLED_APPS = [
+    "sensors.apps.SensorsConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
