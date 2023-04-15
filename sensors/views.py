@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import Http404
 from django.shortcuts import render
 
 from .models import Sensor
@@ -12,5 +12,8 @@ def index(request):
 
 
 def sensor(request, sensor_id):
-    response = f"{request}\n This is {sensor_id}"
-    return HttpResponse(response)
+    try:
+        sensor = Sensor.objects.get(pk=sensor_id)
+    except Sensor.DoesNotExist:
+        raise Http404("Sensor does not exist")
+    return render(request, "plant_app/sensor_detail.html", {"sensor": sensor})
