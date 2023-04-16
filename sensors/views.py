@@ -12,5 +12,5 @@ def index(request):
 
 
 def sensor(request, sensor_id):
-    sensor_id = get_object_or_404(Sensor, pk=sensor_id)
+    sensor = get_object_or_404(Sensor, pk=sensor_id)
     return render(request, "plant_app/sensor_detail.html", {"sensor": sensor})
