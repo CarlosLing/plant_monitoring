@@ -29,6 +29,6 @@ def generate_random_reading(
     if date_time is None:
         date_time = datetime.now()
 
-    sensor_reading = SensorReadings(sensor, value, date_time)
+    sensor_reading = SensorReadings(sensor=sensor, value=value, timestamp=date_time)
 
     return sensor_reading

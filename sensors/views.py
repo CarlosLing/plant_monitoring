@@ -27,17 +27,24 @@ def datapoint_form(request):
 
 
 def save_datapoint(request):
-    print(request.POST)
+    """
+    Saves a datapoint given a request with a sensor
+    - POST:
+        - sensor: id of the sensor
+
+    TODO: At the moment the value of the sensor is random.
+    Add configurations to allow for all the other fields in the request:
+    - value: with the value of the variable measured by the sensor
+    - datetime: provided by the device.
+    """
+
     try:
         sensor = get_object_or_404(Sensor, pk=request.POST["sensor"])
-        random_reading = utils.generate_random_reading(
-            sensor, max_value=100, min_value=0
-        )
-        print(random_reading)
+        random_reading = utils.generate_random_reading(sensor)
+        random_reading.save()
+
     except Sensor.DoesNotExist:
-        print("exception to be implemented")
         sensor_list = list(Sensor.objects.all())
         context = {"sensor_list": sensor_list, "error_message": "NO SENSOR SELECTED"}
         return render(request, "plant_app/add_datapoint.html", context)
-    print(utils.random_value())
     return HttpResponseRedirect(reverse("sensors:manual_collection"))
