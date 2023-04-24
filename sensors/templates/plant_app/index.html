@@ -1,0 +1,10 @@
+{% if sensor_list %}
+<ul>
+    {% for sensor in sensor_list %}
+    <li><a href="{% url 'sensors:sensor' sensor.id %}">{{ sensor.name }}</a></li>
+    {% endfor %}
+</ul>
+<a href="{% url 'sensors:manual_collection' %}">ADD DATAPOINTS</a>
+{% else %}
+<p>No sensors are available.</p>
+{% endif %}

@@ -1,0 +1,16 @@
+<form action="{% url 'sensors:save_datapoint' %}" method="post">
+    {% csrf_token %}
+    <fieldset>
+        <legend>
+            <h1>Add data to </h1>
+        </legend>
+        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+        {% for sensor in sensor_list %}
+        <input type="radio" name="sensor" id="sensor{{ forloop.counter }}" value="{{ sensor.id }}">
+        <label for="sensor{{ forloop.counter }}">{{ sensor.name }}</label><br>
+        {% endfor %}
+
+
+    </fieldset>
+    <input type="submit" value="Save Datapoint">
+</form>
