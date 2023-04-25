@@ -44,3 +44,12 @@ repos:
       - id: trailing-whitespace
       - id: check-json
       - id: detect-private-key
+
+  - repo: local
+    hooks:
+      - id: django-test
+        name: django-test
+        entry: python manage.py test
+        always_run: true
+        pass_filenames: false
+        language: system
