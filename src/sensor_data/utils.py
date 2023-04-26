@@ -8,6 +8,11 @@ from sensors.models import SensorReadings
 
 
 def random_value(max_value: float = 100, min_value: float = 0):
+    if max_value < min_value:
+        raise ValueError(
+            f"max_value: {max_value}, should be greater or equal than min_value: {min_value}"
+        )
+
     return np.random.uniform(high=max_value, low=min_value)
 
 

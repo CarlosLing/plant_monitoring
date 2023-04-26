@@ -22,6 +22,13 @@ class Sensor(models.Model):
 
 
 class SensorReadings(models.Model):
+    """
+    Class to keep sensor readings:
+        - sensor: sensor name
+        - value: value of the variable to measure
+        - timestamp: from the measurement
+    """
+
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
     value = models.FloatField()
     timestamp = models.DateTimeField()
