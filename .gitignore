@@ -1,3 +1,9 @@
+# Custom
+# Vscode configs
+.vscode
+# My secrets
+.secrets
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
