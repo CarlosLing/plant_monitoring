@@ -6,10 +6,19 @@ MKRIoTCarrier carrier;
 
 char ssid[] = SECRET_SSID;        // your network SSID (name)
 char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
+
 int status = WL_IDLE_STATUS;     // the Wifi radio's stat
+
 float temperature;
 float humidity;
 float pressure;
+
+int    HTTP_PORT   = 8000;
+String HTTP_METHOD = "GET";
+char   HOST_NAME[] = "192.168.31.22";
+String PATH_NAME   = "/save_sensor_data/";
+
+WiFiClient client;
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -38,14 +47,34 @@ void setup() {
   Serial.println("----------------------------------------");
   printData();
   Serial.println("----------------------------------------");
+
+  Serial.println("\nStarting connection to server...");
+  // if you get a connection, report back via serial:
+  if (client.connect(HOST_NAME, HTTP_PORT)) {
+    Serial.println("connected to server");
+  }
 }
 
 
 void loop() {
   // check the network connection once every 10 seconds:
-  delay(30000);
-  printData();
+  delay(10000);
 
+  Serial.println("Sending temperature value as GET Request");
+  temperature = carrier.Env.readTemperature(); //reads temperature
+  saveData(1, temperature);
+  Serial.print("Temperature: ");
+  Serial.println(temperature);
+
+  if (client.available())
+  {
+    char c = client.read();
+    Serial.write(c);
+  }
+
+
+  printData();
+  /*
   temperature = carrier.Env.readTemperature(); //reads temperature
   humidity = carrier.Env.readHumidity(); //reads humidity
   pressure = carrier.Pressure.readPressure(); //reads pressure
@@ -55,6 +84,7 @@ void loop() {
   Serial.println(humidity);
   Serial.print("Pressure: ");
   Serial.println(pressure);
+  */
 
   Serial.println("----------------------------------------");
 }
@@ -77,4 +107,16 @@ void printData() {
   Serial.print("signal strength (RSSI):");
   Serial.println(rssi);
 
+}
+
+void saveData(int sensor_id, float value) {
+  /**
+   * Saves data:
+   * Sends Request to HOST_NAME
+   * Adds query arguments sensor and value from the inputs sensor_id and value respectivey
+  */
+  client.println(HTTP_METHOD + " " + PATH_NAME + "?sensor=" + sensor_id + "&value=" + value+ " HTTP/1.1");
+  client.println("Host: " + String(HOST_NAME));
+  client.println("Connection: close");
+  client.println(); // end HTTP header
 }

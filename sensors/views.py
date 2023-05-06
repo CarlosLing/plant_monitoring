@@ -1,3 +1,5 @@
+from django.http import Http404
+from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
@@ -39,6 +41,7 @@ def save_datapoint(request):
     """
 
     try:
+        print(request.POST)
         sensor = get_object_or_404(Sensor, pk=request.POST["sensor"])
         random_reading = utils.generate_random_reading(sensor)
         random_reading.save()
@@ -48,3 +51,31 @@ def save_datapoint(request):
         context = {"sensor_list": sensor_list, "error_message": "NO SENSOR SELECTED"}
         return render(request, "plant_app/add_datapoint.html", context)
     return HttpResponseRedirect(reverse("sensors:manual_collection"))
+
+
+def save_sensor_data(request):
+    """
+    Saves a datapoint given a request with a sensor and a value
+    - GET:
+        - sensor: id of the sensor
+        - value: value read
+    """
+
+    try:
+        sensor_id = request.GET["sensor"]
+    except ValueError:
+        return Http404("Missing sensor id information in query")
+
+    try:
+        value = request.GET["value"]
+    except ValueError:
+        return Http404("Missing value information in query")
+
+    try:
+        sensor = get_object_or_404(Sensor, pk=sensor_id)
+        utils.save_reading(sensor=sensor, value=value)
+        response = f"Saved {sensor.name}, {sensor.variable} with value {value}"
+        return HttpResponse(response)
+
+    except Sensor.DoesNotExist:
+        return Http404(f"Sensor id {sensor_id} does not exist")
