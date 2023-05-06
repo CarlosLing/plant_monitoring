@@ -16,7 +16,7 @@ float pressure;
 int    HTTP_PORT   = 8000;
 String HTTP_METHOD = "GET";
 char   HOST_NAME[] = "192.168.31.22";
-String PATH_NAME   = "/save_sensor_data/";
+String PATH_NAME   = "/sensors/save_sensor_data/";
 
 WiFiClient client;
 
@@ -48,11 +48,6 @@ void setup() {
   printData();
   Serial.println("----------------------------------------");
 
-  Serial.println("\nStarting connection to server...");
-  // if you get a connection, report back via serial:
-  if (client.connect(HOST_NAME, HTTP_PORT)) {
-    Serial.println("connected to server");
-  }
 }
 
 
@@ -65,12 +60,6 @@ void loop() {
   saveData(1, temperature);
   Serial.print("Temperature: ");
   Serial.println(temperature);
-
-  if (client.available())
-  {
-    char c = client.read();
-    Serial.write(c);
-  }
 
 
   printData();
@@ -115,8 +104,33 @@ void saveData(int sensor_id, float value) {
    * Sends Request to HOST_NAME
    * Adds query arguments sensor and value from the inputs sensor_id and value respectivey
   */
-  client.println(HTTP_METHOD + " " + PATH_NAME + "?sensor=" + sensor_id + "&value=" + value+ " HTTP/1.1");
-  client.println("Host: " + String(HOST_NAME));
-  client.println("Connection: close");
-  client.println(); // end HTTP header
+
+  if(client.connect(HOST_NAME, HTTP_PORT))
+  {
+    client.println(HTTP_METHOD + " " + PATH_NAME + "?sensor=" + sensor_id + "&value=" + value+ " HTTP/1.1");
+    client.println("Host: " + String(HOST_NAME));
+    client.println("Connection: close");
+    client.println(); // end HTTP header
+
+    Serial.println(HTTP_METHOD + " " + PATH_NAME + "?sensor=" + sensor_id + "&value=" + value+ " HTTP/1.1");
+    Serial.println("Host: " + String(HOST_NAME));
+    Serial.println("Connection: close");
+    Serial.println(); // end HTTP header
+
+    while(client.connected()) {
+      if(client.available()){
+        // read an incoming byte from the server and print it to serial monitor:
+        char c = client.read();
+        Serial.print(c);
+      }
+    }
+    client.stop();
+    Serial.println();
+    Serial.println("disconnected");
+  }
+
+  else {// if not connected:
+    Serial.println("connection failed");
+  }
+
 }
