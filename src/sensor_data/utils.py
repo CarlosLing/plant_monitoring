@@ -37,3 +37,21 @@ def generate_random_reading(
     sensor_reading = SensorReadings(sensor=sensor, value=value, timestamp=date_time)
 
     return sensor_reading
+
+
+def save_reading(
+    sensor: Sensor,
+    value: float,
+) -> None:
+    """
+    Creates and saves a new sensor reading based on:
+    - sensor: sensor which did the reading
+    - value: value read
+
+    The timestamp used is the one at the time of saving
+    """
+    date_time = datetime.now()
+
+    sensor_reading = SensorReadings(sensor=sensor, value=value, timestamp=date_time)
+
+    sensor_reading.save()

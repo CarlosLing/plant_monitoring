@@ -10,4 +10,5 @@ urlpatterns = [
         "manual_datapoint_collection/", views.datapoint_form, name="manual_collection"
     ),
     path("save_datapoint/", views.save_datapoint, name="save_datapoint"),
+    path("save_sensor_data/", views.save_sensor_data, name="save_sensor_data"),
 ]
