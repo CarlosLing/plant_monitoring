@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 import numpy as np
+import pytz
 
 from sensors.models import Sensor
 from sensors.models import SensorReadings
@@ -50,7 +51,8 @@ def save_reading(
 
     The timestamp used is the one at the time of saving
     """
-    date_time = datetime.now()
+    utc = pytz.UTC
+    date_time = datetime.now().replace(tzinfo=utc)
 
     sensor_reading = SensorReadings(sensor=sensor, value=value, timestamp=date_time)
 
