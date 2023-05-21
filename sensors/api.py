@@ -25,7 +25,10 @@ def sensor_list(request):
 @api_view(["GET", "POST"])
 def sensor_readings(request, pk):
     if request.method == "GET":
-        sensor = Sensor.objects.get(pk=pk)
+        try:
+            sensor = Sensor.objects.get(pk=pk)
+        except Sensor.DoesNotExist:
+            return Response("Sensor does not exist", status=status.HTTP_404_NOT_FOUND)
         readings = SensorReadings.objects.filter(sensor=sensor)
         serializer = SensorReadingsSerializer(readings, many=True)
         return Response(serializer.data)
