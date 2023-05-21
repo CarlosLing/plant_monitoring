@@ -31,7 +31,7 @@ class SensorReadings(models.Model):
 
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
     value = models.FloatField()
-    timestamp = models.DateTimeField()
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.sensor}_{self.value}"
