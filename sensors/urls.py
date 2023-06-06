@@ -14,7 +14,7 @@ urlpatterns = [
     path("save_sensor_data/", views.save_sensor_data, name="save_sensor_data"),
     path("api/sensors", api.sensor_list, name="api_sensor_list"),
     path(
-        "api/sensors_readings/<int:pk>",
+        "api/sensors/<int:pk>",
         api.sensor_readings,
         name="api_sensor_readings_list",
     ),

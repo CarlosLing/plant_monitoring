@@ -22,13 +22,16 @@ def sensor_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["GET", "POST"])
+@api_view(["GET", "POST", "PUT", "DELETE"])
 def sensor_readings(request, pk):
+
+    try:
+        sensor = Sensor.objects.get(pk=pk)
+    except Sensor.DoesNotExist:
+        return Response("Sensor does not exist", status=status.HTTP_404_NOT_FOUND)
+    
+
     if request.method == "GET":
-        try:
-            sensor = Sensor.objects.get(pk=pk)
-        except Sensor.DoesNotExist:
-            return Response("Sensor does not exist", status=status.HTTP_404_NOT_FOUND)
         readings = SensorReadings.objects.filter(sensor=sensor)
         serializer = SensorReadingsSerializer(readings, many=True)
         return Response(serializer.data)
@@ -40,3 +43,14 @@ def sensor_readings(request, pk):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == "PUT":
+        reading_data = request.data
+        serializer = SensorSerializer(sensor, data=reading_data, context={"request": request})
+        if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        sensor.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
