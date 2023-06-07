@@ -81,6 +81,32 @@ class APISensorReadings(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 1)
 
+    def test_sensor_rename(self):
+        sensor = Sensor.objects.create(name="sensor1")
+        response = self.client.put(
+            reverse("sensors:api_sensor_readings_list", args=(sensor.id,)),
+            data={
+                "name": "sensor-renamed",
+                "variable": "sample",
+                "location": "sample",
+                "arduino_board": "sample",
+                "plant": "sample",
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 204)
+        new_sensor = Sensor.objects.all()[0]
+        self.assertEqual(new_sensor.name, "sensor-renamed")
+
+    def test_sensor_delete(self):
+        sensor = Sensor.objects.create(name="sensor1")
+        self.assertEqual(len(Sensor.objects.all()), 1)
+        response = self.client.delete(
+            reverse("sensors:api_sensor_readings_list", args=(sensor.id,))
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(len(Sensor.objects.all()), 0)
+
     def test_sensor_reading_create(self):
         sensor = Sensor.objects.create(name="sensor1")
         response = self.client.post(
