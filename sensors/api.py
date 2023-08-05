@@ -32,7 +32,10 @@ def sensor_readings(request, pk):
     if request.method == "GET":
         readings = SensorReadings.objects.filter(sensor=sensor)
         serializer = SensorReadingsSerializer(readings, many=True)
-        return Response(serializer.data)
+        # Combine this into a function
+        sensor_data = SensorSerializer(sensor).data
+        sensor_data["datapoints"] = serializer.data
+        return Response(sensor_data)
     elif request.method == "POST":
         reading_data = request.data
         reading_data["sensor"] = pk
