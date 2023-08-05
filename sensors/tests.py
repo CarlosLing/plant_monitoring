@@ -79,7 +79,7 @@ class APISensorReadings(TestCase):
             reverse("sensors:api_sensor_readings_list", args=(sensor.id,))
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(len(response.json()["datapoints"]), 1)
 
     def test_sensor_rename(self):
         sensor = Sensor.objects.create(name="sensor1")
@@ -123,7 +123,7 @@ class APISensorReadings(TestCase):
             reverse("sensors:api_sensor_readings_list", args=(sensor.id,))
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(len(response.json()["datapoints"]), 1)
 
     def test_sensor_not_exist(self):
         response = self.client.get(
