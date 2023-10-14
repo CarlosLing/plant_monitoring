@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "plant-monitoring"
+version = "0.1.0"
+description = "Monitor and water plants automatically"
+authors = ["Carlos García Ling <carlos.gling@hotmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Django = "^4.2.6"
+numpy = "1.24.2"
+djangorestframework = "^3.14.0"
+django-cors-headers = "^4.3.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.2"
+pytest-django = "^4.5.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
