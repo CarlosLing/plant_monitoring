@@ -14,6 +14,7 @@ RUN openssl rand -hex 12 >> .secrets/django_secret_key.txt
 # Install requirements
 RUN pip install -r src/requirements.txt
 
+RUN python manage.py makemigrations
 RUN python manage.py migrate
 
 ENTRYPOINT [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]
