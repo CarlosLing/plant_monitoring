@@ -1,6 +1,8 @@
-#include  <WiFiNINA.h>
 #include "arduino_secrets.h"
 #include <Arduino_MKRIoTCarrier.h>
+#include <SPI.h>
+#include <WiFiNINA.h>
+#include <ArduinoHttpClient.h>
 
 MKRIoTCarrier carrier;
 
@@ -12,13 +14,22 @@ int status = WL_IDLE_STATUS;     // the Wifi radio's stat
 float temperature;
 float humidity;
 float pressure;
+int moisture = A5;
+int moist;
 
 int    HTTP_PORT   = 8000;
-String HTTP_METHOD = "GET";
-char   HOST_NAME[] = "192.168.31.22";
-String PATH_NAME   = "/sensors/save_sensor_data/";
+char   HOST_NAME[] = "192.168.1.2";
+String endpoint   = "/sensors/api/sensors";
+
+
+int temperature_sensor_id = 6;
+int humidity_sensor_id = 7;
+int pressure_sensor_id = 8;
+int moisture_sensor_id = 9;
+int battery_sensor_id = 10;
 
 WiFiClient client;
+HttpClient hclient = HttpClient(client, HOST_NAME, 8000);
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -26,12 +37,15 @@ void setup() {
   while (!Serial);
 
   //Initialize carrier
-  delay(1500);
+  delay(15000);
   CARRIER_CASE = true;
   carrier.begin();
+  carrier.Buzzer.beep(800, 100);
+  delay(1000);
 
   // attempt to connect to Wifi network:
   while (status != WL_CONNECTED) {
+    carrier.Buzzer.beep(800, 20);
     Serial.print("Attempting to connect to network: ");
     Serial.println(ssid);
     // Connect to WPA/WPA2 network:
@@ -42,28 +56,52 @@ void setup() {
   }
 
   // you're connected now, so print out the data:
-  Serial.println("You're connected to the network");
 
+  carrier.Buzzer.beep(800, 20);
+  delay(10);
+  carrier.Buzzer.beep(800, 20);
+  Serial.println("You're connected to the network");
   Serial.println("----------------------------------------");
   printData();
   Serial.println("----------------------------------------");
-
+  // saveData(1, 0.0);
+  delay(10000);
 }
 
 
 void loop() {
-  // check the network connection once every 10 seconds:
-  delay(10000);
+  // check the network connection once every 15 mins:
+  delay(9000);
 
-  Serial.println("Sending temperature value as GET Request");
-  temperature = carrier.Env.readTemperature(); //reads temperature
-  saveData(1, temperature);
-  Serial.print("Temperature: ");
+  float temperature = carrier.Env.readTemperature(); //reads temperature
+  Serial.print("temperature: ");
   Serial.println(temperature);
+  // saveData(temperature_sensor_id, temperature);
+
+  float humidity = carrier.Env.readHumidity(); //reads humidiy
+  Serial.print("humidity: ");
+  Serial.println(humidity);
+  // saveData(humidity_sensor_id, humidity);
+
+  float pressure = carrier.Pressure.readPressure();  //reads preassure
+  Serial.print("pressure: ");
+  Serial.println(pressure);
+  // saveData(pressure_sensor_id, pressure);
+
+  int moist = analogRead(moisture);
+  Serial.print("moist: ");
+  Serial.println(moist);
 
 
-  printData();
+  float sensorValue = analogRead(ADC_BATTERY);
+  float battery = sensorValue * (4.3 / 1023.0);
+
+  Serial.print("Battery: ");
+  Serial.println(battery);
+  saveData(1, battery);
+  // saveData(battery_sensor_id, battery);
   /*
+  printData();
   temperature = carrier.Env.readTemperature(); //reads temperature
   humidity = carrier.Env.readHumidity(); //reads humidity
   pressure = carrier.Pressure.readPressure(); //reads pressure
@@ -105,32 +143,32 @@ void saveData(int sensor_id, float value) {
    * Adds query arguments sensor and value from the inputs sensor_id and value respectivey
   */
 
-  if(client.connect(HOST_NAME, HTTP_PORT))
-  {
-    client.println(HTTP_METHOD + " " + PATH_NAME + "?sensor=" + sensor_id + "&value=" + value+ " HTTP/1.1");
-    client.println("Host: " + String(HOST_NAME));
-    client.println("Connection: close");
-    client.println(); // end HTTP header
 
-    Serial.println(HTTP_METHOD + " " + PATH_NAME + "?sensor=" + sensor_id + "&value=" + value+ " HTTP/1.1");
-    Serial.println("Host: " + String(HOST_NAME));
-    Serial.println("Connection: close");
-    Serial.println(); // end HTTP header
+  String sensor_endpoint = endpoint + "/" + sensor_id;
+  String postData = "{\"value\":" + String(value)+"}";
+  Serial.println(postData);
+  // Set the HTTP method, headers, and data
+  hclient.beginRequest();
+  hclient.post(sensor_endpoint);
+  hclient.sendHeader("Content-Type", "application/json");
+  hclient.sendHeader("Content-Length", postData.length());
+  hclient.sendHeader("Connection", "close");
+  hclient.beginBody();
+  hclient.print(postData);
 
-    while(client.connected()) {
-      if(client.available()){
-        // read an incoming byte from the server and print it to serial monitor:
-        char c = client.read();
-        Serial.print(c);
-      }
-    }
-    client.stop();
-    Serial.println();
-    Serial.println("disconnected");
+  int statusCode = hclient.responseStatusCode();
+
+  if (statusCode > 0) {
+    String response = hclient.responseBody();
+    Serial.print("HTTP Response Code: ");
+    Serial.println(statusCode);
+    Serial.print("Response Data: ");
+    Serial.println(response);
+  } else {
+    Serial.print("Error on HTTP request: ");
+    Serial.println(statusCode);
   }
 
-  else {// if not connected:
-    Serial.println("connection failed");
-  }
+  hclient.stop();
 
 }
